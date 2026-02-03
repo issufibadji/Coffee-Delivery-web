@@ -72,6 +72,7 @@ _<h3>Vendo o Histórico 📄</h3>_
 - Uuidv4
 - Date-fns
 - React Router Dom
+- Google OAuth (Login com Google)
 
 ###### 1- Install the dependencies:
 
@@ -80,6 +81,51 @@ _<h3>Vendo o Histórico 📄</h3>_
 ###### 2 - Run de web aplication in development mode:
 
 ``  npm run dev ``
+
+---
+
+<h2>Login com Google (OAuth) 🔐</h2>
+
+<h3>1) Criar Client ID no Google Cloud</h3>
+
+1. Acesse <strong>Google Cloud Console</strong>.
+2. Vá em <strong>APIs & Services → Credentials</strong>.
+3. Clique em <strong>Create Credentials → OAuth client ID</strong>.
+4. Escolha <strong>Web application</strong>.
+
+<h3>2) Configure os endpoints do OAuth</h3>
+
+No seu Client ID, adicione:
+
+<strong>Authorized JavaScript origins</strong>
+
+```
+http://localhost:3000
+```
+
+<strong>Authorized redirect URIs</strong>
+
+```
+http://localhost:3000
+```
+
+<em>Se estiver usando outra porta (ex.: 5173), substitua o endereço pelo que aparece no navegador.</em>
+
+<h3>3) Crie o arquivo .env</h3>
+
+Na raiz do projeto, crie um arquivo <code>.env</code>:
+
+```
+VITE_GOOGLE_CLIENT_ID=SEU_CLIENT_ID.apps.googleusercontent.com
+```
+
+<h3>4) Reinicie o Vite</h3>
+
+O Vite carrega variáveis de ambiente apenas no boot, então pare e rode novamente:
+
+```
+npm run dev
+```
 
 
 <div style="display: inline_block"><br>
