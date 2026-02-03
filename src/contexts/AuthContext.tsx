@@ -6,6 +6,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import type { AuthUser } from '../types/auth';
 import { fetchGoogleUserInfo } from '../services/googleUserInfo';
 import { clearAuthUser, getAuthUser, saveAuthUser } from '../storage/auth';
+import { clearRedirect, getRedirect } from '../storage/redirect';
 
 export type AuthContextData = {
   user: AuthUser | null;
@@ -49,6 +50,12 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
 
         setUser(authUser);
         saveAuthUser(authUser);
+
+        const redirect = getRedirect();
+        if (redirect?.path) {
+          clearRedirect();
+          window.location.href = redirect.path;
+        }
       } catch (error) {
         toast.error('Não foi possível concluir o login com o Google.');
         console.error(error);

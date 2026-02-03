@@ -2,8 +2,10 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../../contexts/AuthContext';
+import { getRedirect } from '../../storage/redirect';
 
 import {
+  LoginAlert,
   LoginButton,
   LoginCard,
   LoginContainer,
@@ -16,6 +18,7 @@ export const Login = () => {
   const { signInWithGoogle, isAuthenticated, isGoogleConfigured, isLoading } =
     useContext(AuthContext);
   const navigate = useNavigate();
+  const redirectInfo = getRedirect();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -30,6 +33,7 @@ export const Login = () => {
         <LoginDescription>
           Use sua conta Google para continuar e manter seus pedidos salvos.
         </LoginDescription>
+        {redirectInfo?.message && <LoginAlert>{redirectInfo.message}</LoginAlert>}
         {!isGoogleConfigured && (
           <LoginDescription>
             Configure o Client ID do Google no arquivo <strong>.env</strong> para

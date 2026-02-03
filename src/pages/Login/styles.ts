@@ -30,6 +30,14 @@ export const LoginDescription = styled.p`
   color: ${({ theme }) => theme.colors['base-text']};
 `;
 
+export const LoginAlert = styled.p`
+  font-size: ${({ theme }) => theme.fonts.sizes.small3};
+  color: ${({ theme }) => theme.colors['1-color']};
+  background-color: ${({ theme }) => theme.colors['3-color']};
+  padding: 0.8rem 1.2rem;
+  border-radius: 6px;
+`;
+
 export const LoginButton = styled.button`
   border: 0;
   border-radius: 6px;

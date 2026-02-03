@@ -45,8 +45,8 @@ export const PaymentForm = ({
 
   const isCepValid = /^[0-9]{5}-[0-9]{3}$/.test(cep);
   const isRoadValid = road.length > 10;
-  const isDistrictValid = district.length > 10;
-  const isComplementValid = complement.length > 20;
+  const isDistrictValid = district.length > 3;
+  const isComplementValid = complement.length > 1;
   const isNumberValid = parseInt(number) > 0 && parseInt(number) <= 999;
 
   const handleCompleteOrder = (data: any) => {
@@ -118,13 +118,13 @@ export const PaymentForm = ({
             Número entre 1 e 999 {FieldValidationIcon(isNumberValid)}
           </FieldValidation>
           <FieldValidation valid={isDistrictValid}>
-            Bairro com + de 10 caracteres {FieldValidationIcon(isDistrictValid)}
+            Bairro com + de 3 caracteres {FieldValidationIcon(isDistrictValid)}
           </FieldValidation>
           <FieldValidation valid={isCepValid}>
             CEP no formato: 0000-000 {FieldValidationIcon(isCepValid)}
           </FieldValidation>
           <FieldValidation valid={isComplementValid}>
-            Complemento com + de 20 caracteres{' '}
+            Complemento com + de 1 caracteres{' '}
             {FieldValidationIcon(isComplementValid)}
           </FieldValidation>
         </Validation>
