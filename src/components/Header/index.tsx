@@ -26,6 +26,7 @@ import logo from '../../assets/logo.png';
 
 export const Header = () => {
   const { cart } = useContext(OrdersContext);
+  const { user, isAuthenticated, signOut } = useContext(AuthContext);
 
   const isCartEmpty = cart.length === 0;
 
