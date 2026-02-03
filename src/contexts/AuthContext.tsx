@@ -7,12 +7,19 @@ import type { AuthUser } from '../types/auth';
 import { fetchGoogleUserInfo } from '../services/googleUserInfo';
 import { clearAuthUser, getAuthUser, saveAuthUser } from '../storage/auth';
 import { clearRedirect, getRedirect } from '../storage/redirect';
+import {
+  clearUserLocation,
+  getUserLocation,
+  saveUserLocation,
+  UserLocation,
+} from '../storage/location';
 
 export type AuthContextData = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isGoogleConfigured: boolean;
   isLoading: boolean;
+  location: UserLocation | null;
   signInWithGoogle: () => Promise<void>;
   signOut: () => void;
 };
@@ -22,6 +29,7 @@ export const AuthContext = createContext<AuthContextData>({
   isAuthenticated: false,
   isGoogleConfigured: false,
   isLoading: false,
+  location: null,
   signInWithGoogle: async () => {},
   signOut: () => {},
 });
@@ -34,6 +42,52 @@ type AuthProviderProps = {
 const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
   const [isLoading, setIsLoading] = useState(false);
+  const [location, setLocation] = useState<UserLocation | null>(() =>
+    getUserLocation(),
+  );
+
+  const resolveUserLocation = async (): Promise<UserLocation | null> => {
+    if (!navigator.geolocation) {
+      return null;
+    }
+
+    const coords = await new Promise<GeolocationCoordinates>((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position.coords),
+        (error) => reject(error),
+        { timeout: 8000 },
+      );
+    }).catch(() => null);
+
+    if (!coords) {
+      return null;
+    }
+
+    try {
+      const response = await fetch(
+        `https://geocode.maps.co/reverse?lat=${coords.latitude}&lon=${coords.longitude}`,
+      );
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = (await response.json()) as {
+        address?: { city?: string; town?: string; state?: string; country_code?: string };
+      };
+      const city =
+        data.address?.city ?? data.address?.town ?? data.address?.state ?? '';
+      const countryCode = data.address?.country_code ?? 'BR';
+
+      if (!city) {
+        return null;
+      }
+
+      return { city, countryCode: countryCode.toUpperCase() };
+    } catch {
+      return null;
+    }
+  };
 
   const signIn = useGoogleLogin({
     scope: 'profile email',
@@ -50,6 +104,12 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
 
         setUser(authUser);
         saveAuthUser(authUser);
+
+        const userLocation = await resolveUserLocation();
+        if (userLocation) {
+          saveUserLocation(userLocation);
+          setLocation(userLocation);
+        }
 
         const redirect = getRedirect();
         if (redirect?.path) {
@@ -77,6 +137,8 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
   const signOut = () => {
     setUser(null);
     clearAuthUser();
+    clearUserLocation();
+    setLocation(null);
     // Mantém o usuário na página atual após logout.
   };
 
@@ -86,10 +148,11 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
       isAuthenticated: !!user,
       isGoogleConfigured: true,
       isLoading,
+      location,
       signInWithGoogle,
       signOut,
     }),
-    [user, isLoading],
+    [user, isLoading, location],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -98,6 +161,7 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
 const AuthProviderFallback = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
   const [isLoading, setIsLoading] = useState(false);
+  const [location] = useState<UserLocation | null>(() => getUserLocation());
 
   const signInWithGoogle = async () => {
     setIsLoading(true);
@@ -119,10 +183,11 @@ const AuthProviderFallback = ({ children }: AuthProviderProps) => {
       isAuthenticated: !!user,
       isGoogleConfigured: false,
       isLoading,
+      location,
       signInWithGoogle,
       signOut,
     }),
-    [user, isLoading],
+    [user, isLoading, location],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

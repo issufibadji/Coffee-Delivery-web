@@ -26,7 +26,7 @@ import logo from '../../assets/logo.png';
 
 export const Header = () => {
   const { cart } = useContext(OrdersContext);
-  const { user, isAuthenticated, signOut } = useContext(AuthContext);
+  const { user, isAuthenticated, signOut, location } = useContext(AuthContext);
 
   const isCartEmpty = cart.length === 0;
 
@@ -47,6 +47,9 @@ export const Header = () => {
   };
 
   const userInitials = getInitials(user?.name ?? user?.email);
+  const locationLabel = location
+    ? `${location.city}, ${location.countryCode}`
+    : 'Rio de Janeiro, BR';
   return (
     <HeaderContainer>
       <Link to="/">
@@ -55,7 +58,7 @@ export const Header = () => {
       <HeaderActions>
         <LocationBadge>
           <GrLocation />
-          <span>Minas Gerais, BR</span>
+          <span>{locationLabel}</span>
         </LocationBadge>
         <IconLink to="/order" title="Acessar o Carrinho">
           <IoIosCart />
