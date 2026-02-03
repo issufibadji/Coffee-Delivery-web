@@ -12,7 +12,8 @@ import {
 } from './styles';
 
 export const Login = () => {
-  const { signInWithGoogle, isAuthenticated } = useContext(AuthContext);
+  const { signInWithGoogle, isAuthenticated, isGoogleConfigured } =
+    useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,7 +29,17 @@ export const Login = () => {
         <LoginDescription>
           Use sua conta Google para continuar e manter seus pedidos salvos.
         </LoginDescription>
-        <LoginButton type="button" onClick={signInWithGoogle}>
+        {!isGoogleConfigured && (
+          <LoginDescription>
+            Configure o Client ID do Google no arquivo <strong>.env</strong> para
+            habilitar o login.
+          </LoginDescription>
+        )}
+        <LoginButton
+          type="button"
+          onClick={signInWithGoogle}
+          disabled={!isGoogleConfigured}
+        >
           Entrar com Google
         </LoginButton>
       </LoginCard>

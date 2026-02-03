@@ -45,4 +45,9 @@ export const LoginButton = styled.button`
   &:hover {
     filter: brightness(0.9);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
 `;

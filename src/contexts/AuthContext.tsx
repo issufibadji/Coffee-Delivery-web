@@ -10,6 +10,7 @@ import { clearAuthUser, getAuthUser, saveAuthUser } from '../storage/auth';
 export type AuthContextData = {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isGoogleConfigured: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => void;
 };
@@ -17,15 +18,17 @@ export type AuthContextData = {
 export const AuthContext = createContext<AuthContextData>({
   user: null,
   isAuthenticated: false,
+  isGoogleConfigured: false,
   signInWithGoogle: async () => {},
   signOut: () => {},
 });
 
 type AuthProviderProps = {
   children: ReactNode;
+  isGoogleConfigured?: boolean;
 };
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
+const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
 
   const signIn = useGoogleLogin({
@@ -67,6 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     () => ({
       user,
       isAuthenticated: !!user,
+      isGoogleConfigured: true,
       signInWithGoogle,
       signOut,
     }),
@@ -74,4 +78,44 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+const AuthProviderFallback = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
+
+  const signInWithGoogle = async () => {
+    toast.error(
+      'O Client ID do Google não está configurado. Verifique o arquivo .env.',
+    );
+  };
+
+  const signOut = () => {
+    setUser(null);
+    clearAuthUser();
+    // Mantém o usuário na página atual após logout.
+  };
+
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isGoogleConfigured: false,
+      signInWithGoogle,
+      signOut,
+    }),
+    [user],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const AuthProvider = ({
+  children,
+  isGoogleConfigured = true,
+}: AuthProviderProps) => {
+  if (isGoogleConfigured) {
+    return <AuthProviderWithGoogle>{children}</AuthProviderWithGoogle>;
+  }
+
+  return <AuthProviderFallback>{children}</AuthProviderFallback>;
 };
