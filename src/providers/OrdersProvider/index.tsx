@@ -1,13 +1,15 @@
 import {
   createContext,
   ReactNode,
+  useContext,
   useEffect,
   useReducer,
-  useState,
 } from 'react';
 import { toast } from 'react-toastify';
 
 import { getNewOrderInfo } from '../../utils/get-new-order-info';
+import { AuthContext } from '../../contexts/AuthContext';
+import { getOrdersState, OrdersState, saveOrdersState } from '../../storage/orders';
 
 export type CoffeeType = {
   title: string;
@@ -43,6 +45,7 @@ interface OrderProps {
   estate: string;
   id: string;
   district: string;
+  userId: string;
 }
 
 interface OrdersContextProps {
@@ -62,12 +65,32 @@ interface OrdersContextProviderProps {
   children: ReactNode;
 }
 
+type CurrentOrderType = {
+  cart: CoffeeType[];
+  totalPrice: number;
+  deliveryPrice: number;
+  productsPrice: number;
+};
+
 export const OrdersProvider = ({ children }: OrdersContextProviderProps) => {
+  const { user } = useContext(AuthContext);
+
+  const userId = user?.id ?? user?.email ?? '';
+  const fallbackState: OrdersState<OrderProps, CurrentOrderType> = {
+    ordersByUser: {},
+    currentOrder: {
+      cart: [],
+      totalPrice: 0,
+      deliveryPrice: 0,
+      productsPrice: 0,
+    },
+  };
+
   const [ordersState, dispatch] = useReducer(
     (state: any, action: any) => {
       switch (action.type) {
         case 'ADD_COFFEE_TO_CART': {
-          const { orders, currentOrder } = state;
+          const { ordersByUser, currentOrder } = state;
           const { cart } = currentOrder;
 
           let newCart = cart.filter((coffee: CoffeeType) => {
@@ -78,11 +101,11 @@ export const OrdersProvider = ({ children }: OrdersContextProviderProps) => {
 
           const newCurrentOrder = getNewOrderInfo(newCart);
           toast.success('Café adicionado ao carrinho com sucesso!');
-          return { orders, currentOrder: newCurrentOrder };
+          return { ordersByUser, currentOrder: newCurrentOrder };
         }
 
         case 'REMOVE_COFFEE_FROM_CART': {
-          const { orders, currentOrder } = state;
+          const { ordersByUser, currentOrder } = state;
           const { cart } = currentOrder;
 
           let newCart = cart.filter((coffee: CoffeeType) => {
@@ -91,22 +114,28 @@ export const OrdersProvider = ({ children }: OrdersContextProviderProps) => {
 
           const newCurrentOrder = getNewOrderInfo(newCart);
           toast.success('Café removido do carrinho com sucesso!');
-          return { orders, currentOrder: newCurrentOrder };
+          return { ordersByUser, currentOrder: newCurrentOrder };
         }
 
         case 'COMPLETE_CURRENT_ORDER':
-          const { orders, currentOrder } = state;
+          const { ordersByUser, currentOrder } = state;
           const { cart, totalPrice } = currentOrder;
+          const { userId } = action.payload;
+          const userOrders = ordersByUser[userId] ?? [];
 
           const newCompleteOrder = {
             cart,
             totalPrice,
             ...action.payload.orderData,
+            userId,
           };
 
           window.location.href = '/order/success';
           return {
-            orders: [...orders, newCompleteOrder],
+            ordersByUser: {
+              ...ordersByUser,
+              [userId]: [...userOrders, newCompleteOrder],
+            },
             currentOrder: {
               cart: [],
               totalPrice: 0,
@@ -119,42 +148,17 @@ export const OrdersProvider = ({ children }: OrdersContextProviderProps) => {
           return state;
       }
     },
-    {
-      orders: [],
-      currentOrder: {
-        cart: [],
-        totalPrice: 0,
-        deliveryPrice: 0,
-        productsPrice: 0,
-      },
-    },
-    () => {
-      const storedStateAsJSON = localStorage.getItem('@coffee-delivery/orders');
-
-      if (storedStateAsJSON) {
-        return JSON.parse(storedStateAsJSON);
-      }
-
-      return {
-        orders: [],
-        currentOrder: {
-          cart: [],
-          totalPrice: 0,
-          deliveryPrice: 0,
-          productsPrice: 0,
-        },
-      };
-    },
+    fallbackState,
+    () => getOrdersState(fallbackState),
   );
 
   useEffect(() => {
-    const stateJSON = JSON.stringify(ordersState);
-
-    localStorage.setItem('@coffee-delivery/orders', stateJSON);
+    saveOrdersState(ordersState);
   }, [ordersState]);
 
-  const { orders, currentOrder } = ordersState;
+  const { ordersByUser, currentOrder } = ordersState;
   const { cart, totalPrice, deliveryPrice, productsPrice } = currentOrder;
+  const orders = userId ? ordersByUser[userId] ?? [] : [];
 
   const addCoffeeToCart = (coffee: CoffeeType, amount: number) => {
     dispatch({
@@ -176,11 +180,16 @@ export const OrdersProvider = ({ children }: OrdersContextProviderProps) => {
   };
 
   const completeCurrentOrder = (orderData: OrderData) => {
+    if (!userId) {
+      return;
+    }
+
     dispatch({
       type: 'COMPLETE_CURRENT_ORDER',
       payload: {
         cart,
         orderData,
+        userId,
       },
     });
   };

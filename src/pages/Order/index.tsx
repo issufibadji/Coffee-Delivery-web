@@ -1,6 +1,7 @@
 import { OrderContainer } from './styles';
 
-import { useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
 import { ptBR } from 'date-fns/locale';
@@ -16,8 +17,16 @@ import { PaymentForm } from './components/PaymentForm';
 
 import { OrdersContext } from '../../providers/OrdersProvider';
 import { toast } from 'react-toastify';
+import { AuthContext } from '../../contexts/AuthContext';
+import {
+  CheckoutFormData,
+  clearCheckoutSnapshot,
+  getCheckoutSnapshot,
+  saveCheckoutSnapshot,
+  saveRedirect,
+} from '../../storage/redirect';
 
-const newCompleteOrderFormSchema = zod.object({
+const newCompleteOrderFormSchema: zod.ZodType<CheckoutFormData> = zod.object({
   CEP: zod.string().regex(/^[0-9]{5}-[0-9]{3}$/),
   road: zod.string().min(10),
   number: zod.string().min(1).max(3),
@@ -27,11 +36,13 @@ const newCompleteOrderFormSchema = zod.object({
   estate: zod.string(),
 });
 
-export type NewCompleteOrderData = zod.infer<typeof newCompleteOrderFormSchema>;
+export type NewCompleteOrderData = CheckoutFormData;
 
 export const Order = () => {
   const { completeCurrentOrder } = useContext(OrdersContext);
+  const { isAuthenticated } = useContext(AuthContext);
   const [paymentPreference, setPaymentPreference] = useState('');
+  const navigate = useNavigate();
 
   const handleSelectPaymentPreference = (newPaymentPreference: string) => {
     setPaymentPreference(newPaymentPreference);
@@ -57,7 +68,27 @@ export const Order = () => {
   //   toast.warning(errors[key].message);
   // }
 
+  useEffect(() => {
+    const snapshot = getCheckoutSnapshot();
+
+    if (snapshot) {
+      reset(snapshot.formData);
+      setPaymentPreference(snapshot.paymentPreference);
+      clearCheckoutSnapshot();
+    }
+  }, [reset]);
+
   const completeOrder = (data: NewCompleteOrderData) => {
+    if (!isAuthenticated) {
+      saveRedirect({
+        path: '/checkout',
+        message: 'Faça login para confirmar o pedido.',
+      });
+      saveCheckoutSnapshot({ formData: data, paymentPreference });
+      navigate('/login');
+      return;
+    }
+
     const newOrderData = {
       ...data,
       paymentPreference,
