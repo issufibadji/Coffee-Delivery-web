@@ -30,8 +30,8 @@ const newCompleteOrderFormSchema: zod.ZodType<CheckoutFormData> = zod.object({
   CEP: zod.string().regex(/^[0-9]{5}-[0-9]{3}$/),
   road: zod.string().min(10),
   number: zod.string().min(1).max(3),
-  complement: zod.string().min(20),
-  district: zod.string().min(10),
+  complement: zod.string().min(1),
+  district: zod.string().min(3),
   city: zod.string(),
   estate: zod.string(),
 });
