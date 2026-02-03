@@ -109,6 +109,20 @@ export const UserAvatar = styled.img`
   object-fit: cover;
 `;
 
+export const UserAvatarFallback = styled.div`
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.colors['4-color']};
+  color: ${({ theme }) => theme.colors['base-light-color']};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${({ theme }) => theme.fonts.sizes.small2};
+  font-weight: 700;
+  text-transform: uppercase;
+`;
+
 export const UserMeta = styled.div`
   display: flex;
   flex-direction: column;

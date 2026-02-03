@@ -34,6 +34,10 @@ export const LoginButton = styled.button`
   border: 0;
   border-radius: 6px;
   padding: 1.2rem 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
   font-size: ${({ theme }) => theme.fonts.sizes.small4};
   font-weight: 700;
   text-transform: uppercase;
@@ -49,5 +53,21 @@ export const LoginButton = styled.button`
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
+  }
+`;
+
+export const LoadingSpinner = styled.span`
+  display: inline-block;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: ${({ theme }) => theme.colors['base-light-color']};
+  animation: spin 0.8s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;

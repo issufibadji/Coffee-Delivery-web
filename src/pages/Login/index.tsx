@@ -9,10 +9,11 @@ import {
   LoginContainer,
   LoginDescription,
   LoginTitle,
+  LoadingSpinner,
 } from './styles';
 
 export const Login = () => {
-  const { signInWithGoogle, isAuthenticated, isGoogleConfigured } =
+  const { signInWithGoogle, isAuthenticated, isGoogleConfigured, isLoading } =
     useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -38,9 +39,16 @@ export const Login = () => {
         <LoginButton
           type="button"
           onClick={signInWithGoogle}
-          disabled={!isGoogleConfigured}
+          disabled={!isGoogleConfigured || isLoading}
         >
-          Entrar com Google
+          {isLoading ? (
+            <>
+              <LoadingSpinner />
+              Entrando...
+            </>
+          ) : (
+            'Entrar com Google'
+          )}
         </LoginButton>
       </LoginCard>
     </LoginContainer>

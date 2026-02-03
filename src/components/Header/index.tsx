@@ -12,6 +12,7 @@ import {
   LocationBadge,
   LogoutButton,
   UserAvatar,
+  UserAvatarFallback,
   UserMenu,
   UserMeta,
 } from './styles';
@@ -25,11 +26,26 @@ import logo from '../../assets/logo.png';
 
 export const Header = () => {
   const { cart } = useContext(OrdersContext);
-  const { user, isAuthenticated, signOut } = useContext(AuthContext);
 
   const isCartEmpty = cart.length === 0;
 
   const userLabel = user?.name ?? user?.email;
+  const getInitials = (value?: string) => {
+    if (!value) {
+      return 'U';
+    }
+
+    const baseValue = value.split('@')[0].replace(/[._-]+/g, ' ').trim();
+    const parts = baseValue.split(' ').filter(Boolean);
+    const initials = parts
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join('');
+
+    return (initials || value.slice(0, 2)).toUpperCase();
+  };
+
+  const userInitials = getInitials(user?.name ?? user?.email);
   return (
     <HeaderContainer>
       <Link to="/">
@@ -54,10 +70,7 @@ export const Header = () => {
             {user?.avatarUrl ? (
               <UserAvatar src={user.avatarUrl} alt={userLabel ?? 'Usuário'} />
             ) : (
-              <UserAvatar
-                src="https://via.placeholder.com/40"
-                alt={userLabel ?? 'Usuário'}
-              />
+              <UserAvatarFallback>{userInitials}</UserAvatarFallback>
             )}
             <UserMeta>
               <strong>{userLabel}</strong>

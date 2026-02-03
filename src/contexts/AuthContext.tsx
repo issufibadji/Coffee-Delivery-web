@@ -11,6 +11,7 @@ export type AuthContextData = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isGoogleConfigured: boolean;
+  isLoading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => void;
 };
@@ -19,6 +20,7 @@ export const AuthContext = createContext<AuthContextData>({
   user: null,
   isAuthenticated: false,
   isGoogleConfigured: false,
+  isLoading: false,
   signInWithGoogle: async () => {},
   signOut: () => {},
 });
@@ -30,6 +32,7 @@ type AuthProviderProps = {
 
 const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
+  const [isLoading, setIsLoading] = useState(false);
 
   const signIn = useGoogleLogin({
     scope: 'profile email',
@@ -49,14 +52,18 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
       } catch (error) {
         toast.error('Não foi possível concluir o login com o Google.');
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     },
     onError: () => {
       toast.error('Não foi possível iniciar o login com o Google.');
+      setIsLoading(false);
     },
   });
 
   const signInWithGoogle = async () => {
+    setIsLoading(true);
     signIn();
   };
 
@@ -71,10 +78,11 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
       user,
       isAuthenticated: !!user,
       isGoogleConfigured: true,
+      isLoading,
       signInWithGoogle,
       signOut,
     }),
-    [user],
+    [user, isLoading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -82,11 +90,14 @@ const AuthProviderWithGoogle = ({ children }: AuthProviderProps) => {
 
 const AuthProviderFallback = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
+  const [isLoading, setIsLoading] = useState(false);
 
   const signInWithGoogle = async () => {
+    setIsLoading(true);
     toast.error(
       'O Client ID do Google não está configurado. Verifique o arquivo .env.',
     );
+    setIsLoading(false);
   };
 
   const signOut = () => {
@@ -100,10 +111,11 @@ const AuthProviderFallback = ({ children }: AuthProviderProps) => {
       user,
       isAuthenticated: !!user,
       isGoogleConfigured: false,
+      isLoading,
       signInWithGoogle,
       signOut,
     }),
-    [user],
+    [user, isLoading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
