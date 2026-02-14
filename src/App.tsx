@@ -1,27 +1,37 @@
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useEffect } from 'react';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
-import { Routes } from './routes';
-
-import { ThemeProvider } from './providers/ThemeProvider';
-import { OrdersProvider } from './providers/OrdersProvider';
 import { AuthProvider } from './contexts/AuthContext';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { checkSupabaseConnection, isSupabaseConfigured } from './services/supabase';
+import { OrdersProvider } from './providers/OrdersProvider';
+import { ThemeProvider } from './providers/ThemeProvider';
+import { Routes } from './routes';
+import {
+  checkSupabaseConnection,
+  isSupabaseConfigured,
+  supabaseConfigError,
+} from './services/supabase';
 
 export default function App() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-
   useEffect(() => {
+    if (supabaseConfigError) {
+      console.error(supabaseConfigError);
+      toast.error(supabaseConfigError);
+      return;
+    }
+
     if (!isSupabaseConfigured) {
       return;
     }
 
     checkSupabaseConnection().then((isConnected) => {
       if (!isConnected) {
-        console.error('Não foi possível conectar ao Supabase.');
+        const message = 'Não foi possível conectar ao Supabase com a configuração atual.';
+        console.error(message);
+        toast.error(message);
       }
     });
   }, []);

@@ -98,11 +98,12 @@ npm install
 Crie (ou edite) um arquivo <code>.env</code> na raiz:
 
 ```
-VITE_SUPABASE_URL=https://SEU_PROJETO.supabase.co
-VITE_SUPABASE_ANON_KEY=SUA_ANON_KEY
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxxxxxxxxxxxxxxx
 ```
 
-> ⚠️ O token com prefixo <code>sbp_</code> é um token de acesso da plataforma Supabase e não deve ser usado como <code>VITE_SUPABASE_ANON_KEY</code> no front-end.
+> ⚠️ O token com prefixo <code>sbp_</code> é um Personal Access Token da plataforma Supabase e não deve ser usado no front-end.
+> Use a chave pública do projeto em <strong>Project Settings → API</strong> (anon/publishable key).
 
 <h3>3) Rode o projeto</h3>
 
