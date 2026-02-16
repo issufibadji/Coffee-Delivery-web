@@ -56,19 +56,19 @@ export const SuccessfulOrder = () => {
               </InfoTag>
               <InfoTag>
                 {getPaymentPreference(
-                  orders[lastPosition].paymentPreference,
+                  orders[lastPosition].payment_method,
                 ) === 'Dinheiro' && <FaMoneyBill />}
                 {getPaymentPreference(
-                  orders[lastPosition].paymentPreference,
+                  orders[lastPosition].payment_method,
                 ) === 'Cartão de Crédito' && <FaMoneyCheck />}
                 {getPaymentPreference(
-                  orders[lastPosition].paymentPreference,
+                  orders[lastPosition].payment_method,
                 ) === 'Cartão de Débito' && <AiFillBank />}
                 <div>
                   <p>Pagamento na entrega</p>
                   <span>
                     {getPaymentPreference(
-                      orders[lastPosition].paymentPreference,
+                      orders[lastPosition].payment_method,
                     )}
                   </span>
                 </div>
