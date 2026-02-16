@@ -110,11 +110,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       setUser(authUser);
 
-      if (!location) {
-        const userLocation = await resolveUserLocation();
-        if (userLocation) {
-          saveUserLocation(userLocation);
-          setLocation(userLocation);
+      // Try to get location from Supabase addresses first
+      try {
+        const { data: addresses } = await supabase
+          .from('addresses')
+          .select('city, estate, country_code: road') // road is just a placeholder, we mostly want city/state
+          .eq('user_id', session.user.id)
+          .eq('is_default', true)
+          .single();
+
+        if (addresses) {
+          const userLoc: UserLocation = {
+            city: addresses.city,
+            countryCode: addresses.estate // Using estate as state/region for the badge
+          };
+          setLocation(userLoc);
+        } else if (!location) {
+          const userLocation = await resolveUserLocation();
+          if (userLocation) {
+            setLocation(userLocation);
+          }
+        }
+      } catch {
+        if (!location) {
+          const userLocation = await resolveUserLocation();
+          if (userLocation) {
+            setLocation(userLocation);
+          }
         }
       }
 

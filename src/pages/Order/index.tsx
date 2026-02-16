@@ -78,7 +78,7 @@ export const Order = () => {
     }
   }, [reset]);
 
-  const completeOrder = (data: NewCompleteOrderData) => {
+  const completeOrder = async (data: NewCompleteOrderData) => {
     if (!isAuthenticated) {
       saveRedirect({
         path: '/checkout',
@@ -89,6 +89,11 @@ export const Order = () => {
       return;
     }
 
+    if (paymentPreference.length === 0) {
+      toast.warning('Selecione um meio de pagamento!');
+      return;
+    }
+
     const newOrderData = {
       ...data,
       paymentPreference,
@@ -96,11 +101,7 @@ export const Order = () => {
       id: uuid(),
     };
 
-    if (paymentPreference.length === 0) {
-      toast.warning('Selecione um meio de pagamento!');
-      return;
-    }
-    completeCurrentOrder(newOrderData);
+    await completeCurrentOrder(newOrderData);
     reset();
   };
 
