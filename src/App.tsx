@@ -1,18 +1,26 @@
-import { ToastContainer } from 'react-toastify';
+import { useEffect } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
-import { Routes } from './routes';
-
-import { ThemeProvider } from './providers/ThemeProvider';
-import { OrdersProvider } from './providers/OrdersProvider';
 import { AuthProvider } from './contexts/AuthContext';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { OrdersProvider } from './providers/OrdersProvider';
+import { ThemeProvider } from './providers/ThemeProvider';
+import { Routes } from './routes';
+import { supabase } from './lib/supabase';
 
 export default function App() {
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  useEffect(() => {
+    // Basic connection check to verify configuration
+    supabase.auth.getSession().then(({ error }) => {
+      if (error) {
+        console.error('Supabase connection error:', error.message);
+        toast.error('Não foi possível conectar ao Supabase.');
+      }
+    });
+  }, []);
 
-  const appContent = (
-    <AuthProvider isGoogleConfigured={!!googleClientId}>
+  return (
+    <AuthProvider>
       <OrdersProvider>
         <ThemeProvider>
           <Routes />
@@ -24,17 +32,5 @@ export default function App() {
         </ThemeProvider>
       </OrdersProvider>
     </AuthProvider>
-  );
-
-  return (
-    <>
-      {googleClientId ? (
-        <GoogleOAuthProvider clientId={googleClientId}>
-          {appContent}
-        </GoogleOAuthProvider>
-      ) : (
-        appContent
-      )}
-    </>
   );
 }

@@ -15,7 +15,7 @@ import {
 } from './styles';
 
 export const Login = () => {
-  const { signInWithGoogle, isAuthenticated, isGoogleConfigured, isLoading } =
+  const { signInWithGoogle, isAuthenticated, isLoading } =
     useContext(AuthContext);
   const navigate = useNavigate();
   const redirectInfo = getRedirect();
@@ -34,16 +34,11 @@ export const Login = () => {
           Use sua conta Google para continuar e manter seus pedidos salvos.
         </LoginDescription>
         {redirectInfo?.message && <LoginAlert>{redirectInfo.message}</LoginAlert>}
-        {!isGoogleConfigured && (
-          <LoginDescription>
-            Configure o Client ID do Google no arquivo <strong>.env</strong> para
-            habilitar o login.
-          </LoginDescription>
-        )}
+
         <LoginButton
           type="button"
           onClick={signInWithGoogle}
-          disabled={!isGoogleConfigured || isLoading}
+          disabled={isLoading}
         >
           {isLoading ? (
             <>

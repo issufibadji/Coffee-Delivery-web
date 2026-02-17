@@ -84,6 +84,33 @@ _<h3>Vendo o Histórico 📄</h3>_
 
 ---
 
+
+<h2>Integração com Supabase 🗄️</h2>
+
+<h3>1) Instale as dependências</h3>
+
+```
+npm install
+```
+
+<h3>2) Configure as variáveis no .env</h3>
+
+Crie (ou edite) um arquivo <code>.env</code> na raiz:
+
+```
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_xxxxxxxxxxxxxxxxxxxxx
+```
+
+> ⚠️ O token com prefixo <code>sbp_</code> é um Personal Access Token da plataforma Supabase e não deve ser usado no front-end.
+> Use a chave pública do projeto em <strong>Project Settings → API</strong> (anon/publishable key).
+
+<h3>3) Rode o projeto</h3>
+
+```
+npm run dev
+```
+
 <h2>Login com Google (OAuth) 🔐</h2>
 
 <h3>1) Criar Client ID no Google Cloud</h3>

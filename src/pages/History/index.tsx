@@ -13,7 +13,7 @@ export const History = () => {
 
   return (
     <HistoryContainer>
-      {orders.length == 0 ? (
+      {orders.length === 0 ? (
         <NoCompleteOrderMessage>
           <h2>Você ainda não completou nenhum pedido!</h2>
         </NoCompleteOrderMessage>
@@ -24,10 +24,10 @@ export const History = () => {
             <HistoryCard
               city={order.city}
               estate={order.estate}
-              cart={order.cart}
-              paymentPreference={order.paymentPreference}
-              date={order.date}
-              totalPrice={order.totalPrice}
+              itemsCount={order.items?.length ?? 0}
+              paymentPreference={order.payment_method}
+              date={order.created_at}
+              totalPrice={Number(order.total_price)}
               key={order.id}
             />
           ))}

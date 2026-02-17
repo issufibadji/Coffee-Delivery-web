@@ -1,12 +1,11 @@
 import { HistoryCardContainer } from './styles';
 
 import { GiShoppingBag } from 'react-icons/gi';
-import { CoffeeType } from '../../../../providers/OrdersProvider';
 import { getPaymentPreference } from '../../../../utils/get-payment-preference';
 
 interface HistoryCardProps {
-  date: string;
-  cart: CoffeeType[];
+  date?: string;
+  itemsCount: number;
   city: string;
   estate: string;
   totalPrice: number;
@@ -15,7 +14,7 @@ interface HistoryCardProps {
 
 export const HistoryCard = ({
   date,
-  cart,
+  itemsCount,
   estate,
   city,
   totalPrice,
@@ -23,19 +22,29 @@ export const HistoryCard = ({
 }: HistoryCardProps) => {
   const translatedPaymentPreference = getPaymentPreference(paymentPreference);
 
+  const formattedDate = date
+    ? new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(date))
+    : 'Data desconhecida';
+
   return (
     <HistoryCardContainer>
       <div>
         <GiShoppingBag />
-        <p>{date}</p>
+        <p>{formattedDate}</p>
       </div>
       <p>
-        Sabores: <span>{cart.length}</span>
+        Sabores: <span>{itemsCount}</span>
       </p>
       <p>{`${city}, ${estate}`}</p>
       <div>
         <p>
-          <span>{`R$ ${totalPrice},00`}</span>
+          <span>{`R$ ${totalPrice.toFixed(2).replace('.', ',')}`}</span>
           {` - Pago com ${translatedPaymentPreference}`}
         </p>
       </div>
